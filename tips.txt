@@ -1,0 +1,16 @@
+https://babia.to/threads/odoo-sharing-modules.102236/page-53
+
+docker compose down -v
+docker compose up -d --build
+
+docker exec -it odoo-web-1 bash
+
+odoo scaffold <your-module-name> /mnt/extra-addons
+
+pip install google-auth
+pip uninstall google-auth -y
+
+pip uninstall pyOpenSSL cryptography -y
+pip install pyOpenSSL==23.3.0 cryptography==42.0.0
+
+# master_password : "unique" : $pbkdf2-sha512$600000$X2vNeS8FYMzZuzfGOEcIQQ$/yjMVOZYoXDG.8wSbg91XqYO1DVJ9yPOYgY0zIuKBLwmNPQUe59zg9AL0AHpjzjv/SLZiGnNNRIQ5kISps5oHA

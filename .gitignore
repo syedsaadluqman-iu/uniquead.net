@@ -1,0 +1,9 @@
+odoo_pg_pass
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Odoo
+*.log
