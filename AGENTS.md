@@ -42,7 +42,7 @@ docker compose down -v
 ### Enter the Odoo container
 
 ```bash
-docker exec -it odoo-web-1 bash
+docker exec -it odoo18-web-1 bash
 ```
 
 ### Create a new module
