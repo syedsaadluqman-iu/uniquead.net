@@ -14,3 +14,9 @@ pip uninstall pyOpenSSL cryptography -y
 pip install pyOpenSSL==23.3.0 cryptography==42.0.0
 
 # master_password : "unique" : $pbkdf2-sha512$600000$X2vNeS8FYMzZuzfGOEcIQQ$/yjMVOZYoXDG.8wSbg91XqYO1DVJ9yPOYgY0zIuKBLwmNPQUe59zg9AL0AHpjzjv/SLZiGnNNRIQ5kISps5oHA
+
+# 1. Remove the latest local commit and discard its changes
+git reset --hard HEAD~1
+
+# 2. Force-update the remote branch
+git push --force-with-lease origin main
