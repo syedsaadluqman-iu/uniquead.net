@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_advertising_root" name="Advertising" sequence="30"
+              groups="group_advertising_sales,group_advertising_operations,group_advertising_accounting"/>
+
+    <menuitem id="menu_advertising_sites" name="Sites" parent="menu_advertising_root" sequence="10"
+              action="advertising_site_action"/>
+    <menuitem id="menu_advertising_schedule" name="Schedule" parent="menu_advertising_root" sequence="20"
+              action="advertising_schedule_action"/>
+    <menuitem id="menu_advertising_requests" name="Booking Requests" parent="menu_advertising_root" sequence="30"
+              action="advertising_request_action" groups="group_advertising_sales"/>
+    <menuitem id="menu_advertising_quotations" name="Quotations" parent="menu_advertising_root" sequence="40"
+              action="advertising_quotation_action" groups="group_advertising_sales"/>
+    <menuitem id="menu_advertising_bookings" name="Bookings" parent="menu_advertising_root" sequence="50"
+              action="advertising_booking_action"/>
+
+    <menuitem id="menu_advertising_config" name="Configuration" parent="menu_advertising_root" sequence="100"
+              groups="group_advertising_operations,group_advertising_manager"/>
+    <menuitem id="menu_advertising_site_types" name="Site Types" parent="menu_advertising_config" sequence="10"
+              action="advertising_site_type_action"/>
+</odoo>

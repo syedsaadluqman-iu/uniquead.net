@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="advertising_site_view_form" model="ir.ui.view">
+        <field name="name">advertising.site.form</field>
+        <field name="model">advertising.site</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="status" widget="statusbar" statusbar_visible="available,reserved,rented"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_bookings" type="object" class="oe_stat_button" icon="fa-calendar-check-o">
+                            <field name="booking_count" widget="statinfo" string="Bookings"/>
+                        </button>
+                        <button name="action_open_map" type="object" class="oe_stat_button" icon="fa-map-marker"
+                                string="Map" invisible="not map_url and not latitude and not longitude"/>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="image_1920" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Main Boulevard Billboard"/></h1>
+                        <h3><field name="code" class="w-50"/></h3>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="site_type_id" options="{'no_create_edit': False}"/>
+                            <field name="active" invisible="1"/>
+                            <field name="is_under_maintenance"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="default_price"/>
+                            <field name="default_billing_frequency"/>
+                            <field name="ownership"/>
+                            <field name="landlord_id" invisible="ownership != 'leased'"
+                                   required="ownership == 'leased'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Location" name="location">
+                            <group>
+                                <group string="Address">
+                                    <field name="street" placeholder="Street..."/>
+                                    <field name="street2" placeholder="Street 2..."/>
+                                    <field name="city"/>
+                                    <field name="state_id"/>
+                                    <field name="zip"/>
+                                    <field name="country_id"/>
+                                </group>
+                                <group string="Map">
+                                    <field name="latitude"/>
+                                    <field name="longitude"/>
+                                    <field name="map_url" widget="url"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Specifications" name="specifications">
+                            <group>
+                                <group>
+                                    <field name="width"/>
+                                    <field name="height"/>
+                                    <field name="area"/>
+                                </group>
+                            </group>
+                            <field name="specifications" placeholder="Material, lighting, orientation, visibility..."/>
+                        </page>
+                        <page string="Photographs" name="photos">
+                            <field name="photo_ids" mode="kanban">
+                                <kanban>
+                                    <field name="image_thumb"/>
+                                    <templates>
+                                        <t t-name="card">
+                                            <field name="image_thumb" widget="image" class="mb-2"/>
+                                            <field name="name"/>
+                                        </t>
+                                    </templates>
+                                </kanban>
+                                <form>
+                                    <group>
+                                        <field name="image" widget="image" options="{'size': [0, 300]}"/>
+                                        <field name="name"/>
+                                        <field name="date"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Availability" name="availability">
+                            <field name="availability_html" readonly="1"/>
+                            <field name="booking_line_ids" readonly="1" invisible="1"/>
+                        </page>
+                        <page string="Internal Notes" name="notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="advertising_site_view_list" model="ir.ui.view">
+        <field name="name">advertising.site.list</field>
+        <field name="model">advertising.site</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="status == 'inactive'" decoration-warning="status == 'maintenance'">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="site_type_id"/>
+                <field name="city" optional="show"/>
+                <field name="area" optional="hide"/>
+                <field name="ownership" optional="show"/>
+                <field name="default_price" optional="show"/>
+                <field name="default_billing_frequency" optional="hide"/>
+                <field name="status" widget="badge"
+                       decoration-success="status == 'available'"
+                       decoration-info="status == 'reserved'"
+                       decoration-primary="status == 'rented'"
+                       decoration-warning="status == 'maintenance'"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="advertising_site_view_kanban" model="ir.ui.view">
+        <field name="name">advertising.site.kanban</field>
+        <field name="model">advertising.site</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status" group_create="false" group_delete="false" group_edit="false">
+                <field name="id"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex">
+                            <div class="flex-grow-1">
+                                <field name="name" class="fw-bold fs-5"/>
+                                <div class="text-muted"><field name="code"/> · <field name="site_type_id"/></div>
+                                <div class="text-muted"><field name="city"/></div>
+                                <div><field name="default_price" widget="monetary"/> / <field name="default_billing_frequency"/></div>
+                            </div>
+                            <field name="image_128" widget="image" class="o_kanban_image_fill_left ms-2" options="{'size': [64, 64]}"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="advertising_site_view_search" model="ir.ui.view">
+        <field name="name">advertising.site.search</field>
+        <field name="model">advertising.site</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" filter_domain="['|', ('name', 'ilike', self), ('code', 'ilike', self)]" string="Site"/>
+                <field name="site_type_id"/>
+                <field name="city"/>
+                <field name="landlord_id"/>
+                <filter name="available" string="Available" domain="[('status', '=', 'available')]"/>
+                <filter name="reserved" string="Reserved" domain="[('status', '=', 'reserved')]"/>
+                <filter name="rented" string="Rented" domain="[('status', '=', 'rented')]"/>
+                <filter name="maintenance" string="Maintenance" domain="[('status', '=', 'maintenance')]"/>
+                <separator/>
+                <filter name="owned" string="Owned" domain="[('ownership', '=', 'owned')]"/>
+                <filter name="leased" string="Leased" domain="[('ownership', '=', 'leased')]"/>
+                <separator/>
+                <filter name="inactive" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_type" string="Site Type" context="{'group_by': 'site_type_id'}"/>
+                    <filter name="group_status" string="Status" context="{'group_by': 'status'}"/>
+                    <filter name="group_ownership" string="Ownership" context="{'group_by': 'ownership'}"/>
+                    <filter name="group_city" string="City" context="{'group_by': 'city'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="advertising_site_action" model="ir.actions.act_window">
+        <field name="name">Sites</field>
+        <field name="res_model">advertising.site</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="advertising_site_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first advertising site</p>
+            <p>Billboards, wallscapes, rooftops, digital screens... each site can be rented to customers.</p>
+        </field>
+    </record>
+</odoo>

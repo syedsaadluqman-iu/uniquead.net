@@ -1,0 +1,25 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_site_type_sales,advertising.site.type sales,model_advertising_site_type,group_advertising_sales,1,0,0,0
+access_site_type_accounting,advertising.site.type accounting,model_advertising_site_type,group_advertising_accounting,1,0,0,0
+access_site_type_operations,advertising.site.type operations,model_advertising_site_type,group_advertising_operations,1,1,1,0
+access_site_type_manager,advertising.site.type manager,model_advertising_site_type,group_advertising_manager,1,1,1,1
+access_site_sales,advertising.site sales,model_advertising_site,group_advertising_sales,1,0,0,0
+access_site_accounting,advertising.site accounting,model_advertising_site,group_advertising_accounting,1,0,0,0
+access_site_operations,advertising.site operations,model_advertising_site,group_advertising_operations,1,1,1,0
+access_site_manager,advertising.site manager,model_advertising_site,group_advertising_manager,1,1,1,1
+access_site_photo_sales,advertising.site.photo sales,model_advertising_site_photo,group_advertising_sales,1,0,0,0
+access_site_photo_accounting,advertising.site.photo accounting,model_advertising_site_photo,group_advertising_accounting,1,0,0,0
+access_site_photo_operations,advertising.site.photo operations,model_advertising_site_photo,group_advertising_operations,1,1,1,1
+access_site_photo_manager,advertising.site.photo manager,model_advertising_site_photo,group_advertising_manager,1,1,1,1
+access_booking_sales,advertising.booking sales,model_advertising_booking,group_advertising_sales,1,1,1,0
+access_booking_operations,advertising.booking operations,model_advertising_booking,group_advertising_operations,1,0,0,0
+access_booking_accounting,advertising.booking accounting,model_advertising_booking,group_advertising_accounting,1,0,0,0
+access_booking_manager,advertising.booking manager,model_advertising_booking,group_advertising_manager,1,1,1,1
+access_booking_line_sales,advertising.booking.line sales,model_advertising_booking_line,group_advertising_sales,1,1,1,1
+access_booking_line_operations,advertising.booking.line operations,model_advertising_booking_line,group_advertising_operations,1,0,0,0
+access_booking_line_accounting,advertising.booking.line accounting,model_advertising_booking_line,group_advertising_accounting,1,0,0,0
+access_booking_line_manager,advertising.booking.line manager,model_advertising_booking_line,group_advertising_manager,1,1,1,1
+access_booking_charge_sales,advertising.booking.charge sales,model_advertising_booking_charge,group_advertising_sales,1,1,1,1
+access_booking_charge_operations,advertising.booking.charge operations,model_advertising_booking_charge,group_advertising_operations,1,0,0,0
+access_booking_charge_accounting,advertising.booking.charge accounting,model_advertising_booking_charge,group_advertising_accounting,1,0,0,0
+access_booking_charge_manager,advertising.booking.charge manager,model_advertising_booking_charge,group_advertising_manager,1,1,1,1
