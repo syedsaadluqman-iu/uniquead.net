@@ -4,13 +4,13 @@ from odoo import fields
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import Form, tagged
 from odoo.tests.common import TransactionCase
-from odoo.tools import file_open
 
 from ..models.utils import compute_period_count
+from .common import TemplateImportMixin
 
 
 @tagged('post_install', '-at_install')
-class TestAdvertising(TransactionCase):
+class TestAdvertising(TemplateImportMixin, TransactionCase):
 
     @classmethod
     def setUpClass(cls):
@@ -133,31 +133,6 @@ class TestAdvertising(TransactionCase):
         self.assertEqual(site_line.product_uom_qty, 3.0)
         self.assertEqual(site_line.price_unit, 900.0)
         self.assertEqual(site_line.price_subtotal, 2700.0)
-
-    def _run_template_import(self, model, sheet):
-        """Import the module's own template the way the Import screen does:
-        headers are auto-matched to fields and every column must match."""
-        template = self.env[model].get_import_templates()[0]['template']
-        with file_open(template.replace('/advertising_management/', 'advertising_management/', 1), 'rb') as f:
-            content = f.read()
-        wizard = self.env['base_import.import'].create({
-            'res_model': model,
-            'file': content,
-            'file_name': 'template.xlsx',
-            'file_type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        })
-        options = {'has_headers': True, 'quoting': '"', 'separator': ',', 'sheet': sheet,
-                   'float_thousand_separator': ',', 'float_decimal_separator': '.',
-                   'date_format': '', 'datetime_format': ''}
-        preview = wizard.parse_preview(options)
-        self.assertFalse(preview.get('error'), preview)
-        matches = preview['matches']
-        fields_list = ['/'.join(matches[i]) if matches.get(i) else False
-                       for i in range(len(preview['headers']))]
-        self.assertTrue(all(fields_list), list(zip(preview['headers'], fields_list)))
-        result = wizard.execute_import(fields_list, preview['headers'], options)
-        self.assertFalse(result.get('messages'), result)
-        return result
 
     def test_booking_import_template_history(self):
         self.site.code = 'SITE-0001'

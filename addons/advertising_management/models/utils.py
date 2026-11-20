@@ -50,6 +50,38 @@ def compute_period_count(date_start, date_end, frequency):
     return float(full)
 
 
+def generate_periods(date_start, date_end, frequency):
+    """Split a date range into billing periods: ``[(date_from, date_to, quantity)]``.
+
+    Whole periods have a quantity of 1 and a trailing partial period is
+    pro-rated by days, consistent with ``compute_period_count``. The ``custom``
+    frequency yields a single period covering the whole range.
+    """
+    if not date_start or not date_end or date_end < date_start:
+        return []
+    end_exclusive = date_end + timedelta(days=1)
+    if frequency == 'custom' or (frequency != 'weekly' and frequency not in FREQUENCY_MONTHS):
+        return [(date_start, date_end, 1.0)]
+
+    def period_start(index):
+        if frequency == 'weekly':
+            return date_start + timedelta(weeks=index)
+        return date_start + relativedelta(months=FREQUENCY_MONTHS[frequency] * index)
+
+    periods = []
+    index = 0
+    while period_start(index) < end_exclusive:
+        start = period_start(index)
+        next_start = period_start(index + 1)
+        if next_start <= end_exclusive:
+            periods.append((start, next_start - timedelta(days=1), 1.0))
+        else:
+            quantity = round((end_exclusive - start).days / float((next_start - start).days), 2)
+            periods.append((start, date_end, quantity))
+        index += 1
+    return periods
+
+
 def format_range(env, date_start, date_end):
     from odoo.tools.misc import format_date
     return f"{format_date(env, date_start)} - {format_date(env, date_end)}"

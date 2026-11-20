@@ -42,6 +42,17 @@ class AdvertisingBooking(models.Model):
     notes = fields.Html(string='Internal Notes')
     attachment_ids = fields.Many2many('ir.attachment', string='Documents')
 
+    auto_invoice = fields.Boolean(string='Generate Invoices Automatically', default=True,
+                                  help="Draft invoices are created every day for the billing periods that are due.")
+    schedule_ids = fields.One2many('advertising.billing.schedule', 'booking_id', string='Billing Schedule')
+    invoice_ids = fields.One2many('account.move', 'advertising_booking_id', string='Invoices',
+                                  domain=[('move_type', 'in', ('out_invoice', 'out_refund'))],
+                                  groups='account.group_account_readonly')
+    invoice_count = fields.Integer(compute='_compute_invoice_amounts', groups='account.group_account_readonly')
+    amount_invoiced = fields.Monetary(compute='_compute_invoice_amounts', groups='account.group_account_readonly')
+    amount_paid = fields.Monetary(compute='_compute_invoice_amounts', groups='account.group_account_readonly')
+    amount_outstanding = fields.Monetary(compute='_compute_invoice_amounts', groups='account.group_account_readonly')
+
     @api.model
     def get_import_templates(self):
         return [{
@@ -52,7 +63,7 @@ class AdvertisingBooking(models.Model):
     @api.depends('company_id')
     def _compute_currency_id(self):
         for booking in self:
-            booking.currency_id = booking.company_id.currency_id
+            booking.currency_id = (booking.company_id or self.env.company).currency_id
 
     @api.depends('line_ids.date_start', 'line_ids.date_end')
     def _compute_dates(self):
@@ -74,6 +85,13 @@ class AdvertisingBooking(models.Model):
             booking.amount_tax = sum(booking.line_ids.mapped('price_tax')) + sum(
                 booking.charge_ids.mapped('price_tax'))
             booking.amount_total = booking.amount_untaxed + booking.amount_tax
+
+    @api.depends('invoice_ids.amount_total', 'invoice_ids.amount_residual', 'invoice_ids.state')
+    def _compute_invoice_amounts(self):
+        for booking in self:
+            booking.invoice_count = len(booking.invoice_ids)
+            booking.amount_invoiced, booking.amount_paid, booking.amount_outstanding = \
+                booking.invoice_ids._get_advertising_amounts()
 
     @api.model
     def _get_default_rental_taxes(self, company, partner):
@@ -107,8 +125,10 @@ class AdvertisingBooking(models.Model):
                 continue
             if not booking.line_ids:
                 raise UserError(_("Add at least one site before confirming booking %s.", booking.name))
-        self.filtered(lambda b: b.state == 'draft').write({'state': 'confirmed'})
+        drafts = self.filtered(lambda b: b.state == 'draft')
+        drafts.write({'state': 'confirmed'})
         self._update_states()
+        drafts.line_ids._generate_billing_schedule()
 
     def action_complete(self):
         self.filtered(lambda b: b.state == 'active').write({'state': 'completed'})
@@ -141,4 +161,24 @@ class AdvertisingBooking(models.Model):
             'res_model': 'sale.order',
             'res_id': self.sale_order_id.id,
             'view_mode': 'form',
+        }
+
+    def action_create_due_invoices(self):
+        today = fields.Date.context_today(self)
+        due = self.schedule_ids.filtered(
+            lambda p: p.state == 'to_invoice' and p.invoice_date <= today)
+        if not due:
+            raise UserError(_("There is no billing period to invoice yet."))
+        return due.action_create_invoices()
+
+    def action_view_invoices(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Invoices"),
+            'res_model': 'account.move',
+            'view_mode': 'list,form',
+            'domain': [('id', 'in', self.invoice_ids.ids)],
+            'context': {'default_move_type': 'out_invoice', 'default_partner_id': self.partner_id.id,
+                        'default_advertising_booking_id': self.id},
         }

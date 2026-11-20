@@ -2,7 +2,8 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 from .utils import (
-    BILLING_FREQUENCIES, BLOCKING_STATES, compute_period_count, drop_blank_import_values, format_range)
+    BILLING_FREQUENCIES, BLOCKING_STATES, compute_period_count, drop_blank_import_values, format_range,
+    generate_periods)
 
 
 class AdvertisingBookingLine(models.Model):
@@ -41,11 +42,25 @@ class AdvertisingBookingLine(models.Model):
 
     sale_line_id = fields.Many2one('sale.order.line', string='Quotation Line',
                                    readonly=True, copy=False, index=True)
+    schedule_ids = fields.One2many('advertising.billing.schedule', 'booking_line_id',
+                                   string='Billing Schedule', copy=False)
 
     _sql_constraints = [
         ('dates_check', 'CHECK(date_end >= date_start)', 'The end date cannot be before the start date.'),
         ('discount_check', 'CHECK(discount >= 0 AND discount <= 100)', 'The discount must be between 0 and 100%.'),
     ]
+
+    def _generate_billing_schedule(self, skip_before=None):
+        """Create or realign the billing periods of the lines.
+
+        Periods already invoiced are never touched. Periods ending before
+        ``skip_before`` are marked as not to invoice (history billed elsewhere).
+        """
+        for line in self:
+            periods = generate_periods(line.date_start, line.date_end, line.billing_frequency)
+            if line.billing_frequency == 'custom' and periods:
+                periods = [(periods[0][0], periods[0][1], line.period_count or 1.0)]
+            self.env['advertising.billing.schedule']._sync_periods(line, periods, skip_before)
 
     @api.model_create_multi
     def create(self, vals_list):

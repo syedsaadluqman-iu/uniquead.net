@@ -7,3 +7,7 @@ from . import booking_line
 from . import booking_charge
 from . import sale_order
 from . import sale_order_line
+from . import schedule_mixin
+from . import billing_schedule
+from . import lease
+from . import account_move

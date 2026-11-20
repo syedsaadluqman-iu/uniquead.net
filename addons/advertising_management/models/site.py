@@ -65,6 +65,15 @@ class AdvertisingSite(models.Model):
 
     booking_line_ids = fields.One2many('advertising.booking.line', 'site_id', string='Booking Lines')
     booking_count = fields.Integer(compute='_compute_booking_count')
+    lease_ids = fields.One2many('advertising.lease', 'site_id', string='Landlord Leases')
+    lease_count = fields.Integer(compute='_compute_lease_count')
+
+    # Profitability, from posted invoices and vendor bills traced to the site
+    revenue = fields.Monetary(compute='_compute_financials', groups='advertising_management.group_advertising_accounting')
+    cost = fields.Monetary(compute='_compute_financials', groups='advertising_management.group_advertising_accounting')
+    profit = fields.Monetary(compute='_compute_financials', groups='advertising_management.group_advertising_accounting')
+    invoice_count = fields.Integer(compute='_compute_financials', groups='advertising_management.group_advertising_accounting')
+    bill_count = fields.Integer(compute='_compute_financials', groups='advertising_management.group_advertising_accounting')
     availability_html = fields.Html(compute='_compute_availability_html', sanitize=False)
     notes = fields.Html(string='Internal Notes')
 
@@ -106,6 +115,36 @@ class AdvertisingSite(models.Model):
     def _compute_booking_count(self):
         for site in self:
             site.booking_count = len(site.booking_line_ids.booking_id)
+
+    @api.depends('lease_ids')
+    def _compute_lease_count(self):
+        for site in self:
+            site.lease_count = len(site.lease_ids)
+
+    def _compute_financials(self):
+        totals = {}
+        counts = {}
+        site_ids = [site.id for site in self if site.id]
+        if site_ids:
+            lines = self.env['account.move.line'].sudo()
+            for site, move_type, result in lines._read_group(
+                    [('advertising_site_id', 'in', site_ids), ('parent_state', '=', 'posted'),
+                     ('display_type', '=', 'product')],
+                    ['advertising_site_id', 'move_type'], ['advertising_result:sum']):
+                totals[(site.id, move_type)] = result
+            for site, move_type, move_count in lines._read_group(
+                    [('advertising_site_id', 'in', site_ids), ('parent_state', '=', 'posted'),
+                     ('display_type', '=', 'product')],
+                    ['advertising_site_id', 'move_type'], ['move_id:count_distinct']):
+                counts[(site.id, move_type)] = move_count
+        for site in self:
+            revenue = totals.get((site.id, 'out_invoice'), 0.0) + totals.get((site.id, 'out_refund'), 0.0)
+            cost = -(totals.get((site.id, 'in_invoice'), 0.0) + totals.get((site.id, 'in_refund'), 0.0))
+            site.revenue = revenue
+            site.cost = cost
+            site.profit = revenue - cost
+            site.invoice_count = counts.get((site.id, 'out_invoice'), 0) + counts.get((site.id, 'out_refund'), 0)
+            site.bill_count = counts.get((site.id, 'in_invoice'), 0) + counts.get((site.id, 'in_refund'), 0)
 
     @api.depends('booking_line_ids.state', 'booking_line_ids.date_start', 'booking_line_ids.date_end')
     def _compute_availability_html(self):
@@ -187,6 +226,36 @@ class AdvertisingSite(models.Model):
             'view_mode': 'list,form',
             'domain': [('line_ids.site_id', '=', self.id)],
         }
+
+    def action_view_leases(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Landlord Leases"),
+            'res_model': 'advertising.lease',
+            'view_mode': 'list,form',
+            'domain': [('site_id', '=', self.id)],
+            'context': {'default_site_id': self.id},
+        }
+
+    def _action_view_moves(self, name, move_types):
+        self.ensure_one()
+        moves = self.env['account.move'].search([
+            ('invoice_line_ids.advertising_site_id', '=', self.id), ('move_type', 'in', move_types),
+            ('state', '=', 'posted')])
+        return {
+            'type': 'ir.actions.act_window',
+            'name': name,
+            'res_model': 'account.move',
+            'view_mode': 'list,form',
+            'domain': [('id', 'in', moves.ids)],
+        }
+
+    def action_view_invoices(self):
+        return self._action_view_moves(_("Invoices"), ['out_invoice', 'out_refund'])
+
+    def action_view_bills(self):
+        return self._action_view_moves(_("Vendor Bills"), ['in_invoice', 'in_refund'])
 
     def action_open_map(self):
         self.ensure_one()

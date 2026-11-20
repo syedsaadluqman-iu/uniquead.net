@@ -14,6 +14,27 @@
     <menuitem id="menu_advertising_bookings" name="Bookings" parent="menu_advertising_root" sequence="50"
               action="advertising_booking_action"/>
 
+    <menuitem id="menu_advertising_billing" name="Billing" parent="menu_advertising_root" sequence="60"
+              groups="group_advertising_accounting,group_advertising_sales"/>
+    <menuitem id="menu_advertising_billing_schedule" name="Billing Schedule" parent="menu_advertising_billing"
+              sequence="10" action="advertising_billing_schedule_action"/>
+    <menuitem id="menu_advertising_invoices" name="Customer Invoices" parent="menu_advertising_billing"
+              sequence="20" action="advertising_invoice_action" groups="group_advertising_accounting"/>
+
+    <menuitem id="menu_advertising_leases_root" name="Leases" parent="menu_advertising_root" sequence="70"
+              groups="group_advertising_accounting,group_advertising_operations"/>
+    <menuitem id="menu_advertising_leases" name="Landlord Leases" parent="menu_advertising_leases_root"
+              sequence="10" action="advertising_lease_action"/>
+    <menuitem id="menu_advertising_lease_schedule" name="Payment Schedule" parent="menu_advertising_leases_root"
+              sequence="20" action="advertising_lease_schedule_action"/>
+    <menuitem id="menu_advertising_bills" name="Vendor Bills" parent="menu_advertising_leases_root"
+              sequence="30" action="advertising_bill_action" groups="group_advertising_accounting"/>
+
+    <menuitem id="menu_advertising_reporting" name="Reporting" parent="menu_advertising_root" sequence="90"
+              groups="group_advertising_accounting"/>
+    <menuitem id="menu_advertising_profitability" name="Site Profitability" parent="menu_advertising_reporting"
+              sequence="10" action="advertising_profitability_action"/>
+
     <menuitem id="menu_advertising_config" name="Configuration" parent="menu_advertising_root" sequence="100"
               groups="group_advertising_operations,group_advertising_manager"/>
     <menuitem id="menu_advertising_site_types" name="Site Types" parent="menu_advertising_config" sequence="10"

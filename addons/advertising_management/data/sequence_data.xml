@@ -16,5 +16,13 @@
             <field name="padding">4</field>
             <field name="company_id" eval="False"/>
         </record>
+
+        <record id="seq_advertising_lease" model="ir.sequence">
+            <field name="name">Advertising Landlord Lease</field>
+            <field name="code">advertising.lease</field>
+            <field name="prefix">LS/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
     </data>
 </odoo>

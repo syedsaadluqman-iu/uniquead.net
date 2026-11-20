@@ -1,4 +1,4 @@
-from odoo import api, fields, models
+from odoo import Command, api, fields, models
 
 from .utils import drop_blank_import_values
 
@@ -22,12 +22,26 @@ class AdvertisingBookingCharge(models.Model):
     price_subtotal = fields.Monetary(compute='_compute_amounts', store=True)
     price_tax = fields.Monetary(compute='_compute_amounts', store=True)
     price_total = fields.Monetary(compute='_compute_amounts', store=True)
+    is_billed = fields.Boolean(string='Already Billed', copy=False,
+                               help="Billed charges are not added to the next generated invoice.")
+    move_id = fields.Many2one('account.move', string='Invoice', readonly=True, copy=False,
+                              ondelete='set null')
 
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
             drop_blank_import_values(self.env, vals, ('tax_ids',))
         return super().create(vals_list)
+
+    def _prepare_invoice_line_vals(self, product):
+        self.ensure_one()
+        return {
+            'product_id': product.id,
+            'name': self.name,
+            'quantity': self.quantity,
+            'price_unit': self.price_unit,
+            'tax_ids': [Command.set(self.tax_ids.ids)],
+        }
 
     @api.depends('partner_id', 'company_id')
     def _compute_tax_ids(self):

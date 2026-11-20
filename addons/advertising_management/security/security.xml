@@ -54,5 +54,23 @@
             <field name="model_id" ref="model_advertising_booking_charge"/>
             <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
         </record>
+
+        <record id="advertising_billing_schedule_comp_rule" model="ir.rule">
+            <field name="name">Advertising billing schedule multi-company</field>
+            <field name="model_id" ref="model_advertising_billing_schedule"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="advertising_lease_comp_rule" model="ir.rule">
+            <field name="name">Advertising lease multi-company</field>
+            <field name="model_id" ref="model_advertising_lease"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="advertising_lease_schedule_comp_rule" model="ir.rule">
+            <field name="name">Advertising lease schedule multi-company</field>
+            <field name="model_id" ref="model_advertising_lease_schedule"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
     </data>
 </odoo>

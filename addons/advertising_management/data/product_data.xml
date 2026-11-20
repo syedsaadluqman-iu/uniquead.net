@@ -8,5 +8,13 @@
             <field name="purchase_ok" eval="False"/>
             <field name="list_price">0.0</field>
         </record>
+
+        <record id="product_site_lease" model="product.template">
+            <field name="name">Advertising Site Lease</field>
+            <field name="type">service</field>
+            <field name="sale_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="list_price">0.0</field>
+        </record>
     </data>
 </odoo>

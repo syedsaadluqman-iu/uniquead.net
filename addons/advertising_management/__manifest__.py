@@ -1,12 +1,13 @@
 {
     'name': 'Advertising Site Rental Management',
-    'version': '18.0.1.0.0',
+    'version': '18.0.2.0.0',
     'category': 'Sales',
-    'summary': 'Manage advertising sites, availability, quotations and bookings',
+    'summary': 'Manage advertising sites, bookings, customer invoicing and landlord leases',
     'description': """
 Manage the rental of advertising sites (billboards, wallscapes, rooftops,
 digital screens...): site catalogue, availability schedule, quotations
-(built on Sales) and confirmed bookings.
+(built on Sales), confirmed bookings, recurring customer invoices, landlord
+leases with vendor bills and site profitability (built on Accounting).
     """,
     'author': 'Unique Advertising',
     'depends': ['mail', 'sale_management', 'account'],
@@ -21,6 +22,9 @@ digital screens...): site catalogue, availability schedule, quotations
         'views/site_views.xml',
         'views/booking_views.xml',
         'views/sale_order_views.xml',
+        'views/billing_views.xml',
+        'views/lease_views.xml',
+        'views/account_move_views.xml',
         'views/menu_views.xml',
     ],
     'license': 'LGPL-3',
